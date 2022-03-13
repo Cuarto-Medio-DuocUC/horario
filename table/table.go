@@ -29,11 +29,18 @@ func NewTable(writer io.Writer) Table {
 	table.SetAutoWrapText(false)
 	table.SetHeader(header)
 	table.SetHeaderColor(headerColors()...)
-	table.SetAutoMergeCellsByColumnIndex([]int{0, 3, 4, 5, 6})
 	table.SetAlignment(tablewriter.ALIGN_LEFT)
 	table.SetRowLine(true)
 
 	return Table{table}
+}
+
+func (t Table) MergeDay(b bool) {
+	columsToMerge := []int{0, 3, 4, 5, 6}
+	if !b {
+		columsToMerge = columsToMerge[1:]
+	}
+	t.table.SetAutoMergeCellsByColumnIndex(columsToMerge)
 }
 
 func (t Table) Render() {

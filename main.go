@@ -1,56 +1,32 @@
 package main
 
 import (
-	"encoding/json"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
+	"time"
+
+	"github.com/Cuarto-Medio-IFPT-DuocUC-2022/horario/table"
 )
-
-type WeekDay int
-
-const (
-	Monday WeekDay = iota + 1
-	Tuesday
-	Wednesday
-	Thursday
-	Friday
-	Saturday
-)
-
-type Professor struct {
-	Name  string `json:"name"`
-	Email string `json:"email"`
-}
-
-type Course struct {
-	Name      string `json:"name"`
-	Code      string `json:"code"`
-	Professor
-}
-
-type Classroom struct {
-	TimeInit string `json:"timeInit"`
-	TimeEnd  string `json:"timeEnd"`
-	Campus   string `json:"campus"`
-	Room     string `json:"room"`
-	Course
-}
-
-type ClassDay struct {
-	Day        WeekDay     `json:"day,string"`
-	Classrooms []Classroom `json:"classrooms"`
-}
 
 func main() {
+	today := int(time.Now().Weekday())
+
+	var wD int
+	flag.IntVar(&wD, "dia", today, "Día de la semmana 1 Lunes a 6 Sábado")
+	flag.Parse()
+
+	if wD > int(Saturday) || wD < int(Sunday) {
+		fmt.Printf("El día %d no es parte del rango de la semana\n", wD)
+		os.Exit(1)
+	}
+
 	file, err := os.Open("./fixtures/horario.json")
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	fmt.Println("file opened ok")
-
 	defer file.Close()
 
 	data, err := ioutil.ReadAll(file)
@@ -58,14 +34,33 @@ func main() {
 		log.Fatal(err)
 	}
 
-	var classweek []ClassDay
-	cw := make(map[WeekDay][]Classroom)
-	err = json.Unmarshal(data, &classweek)
+	weekDay := WeekDay(wD)
+	courses, err := RequestedCourses(data, weekDay)
 	if err != nil {
 		log.Fatal(err)
 	}
-    for _, day := range classweek {
-		cw[day.Day] = day.Classrooms
+	if len(courses) == 0 {
+		fmt.Printf("No hay clases hoy %s\n", weekDay)
+		os.Exit(0)
 	}
 
+	table := table.NewTable(os.Stdout)
+
+	table.MergeDay(len(courses) > 2)
+
+	for _, course := range courses {
+		datum := []string{
+			weekDay.String(),
+			course.TimeInit,
+			course.TimeEnd,
+			course.Course.Code,
+			course.Course.Name,
+			course.Campus,
+			course.Room,
+		}
+		table.Append(datum)
+	}
+
+	fmt.Println()
+	table.Render()
 }

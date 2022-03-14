@@ -6,12 +6,35 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"os/user"
 	"time"
 
 	"github.com/Cuarto-Medio-IFPT-DuocUC-2022/horario/table"
 )
 
+const fileName = "horario.json"
+
 func main() {
+
+    user, err := user.Current()
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    fromConfig := fmt.Sprintf("%s/.config/%s", user.HomeDir, fileName)
+
+    // read file from config directory
+    file, err := os.Open(fromConfig)
+    if err != nil {
+        if os.IsNotExist(err) {
+            fmt.Printf("La informacion del horario no esta en la ruta %s\n", fromConfig)
+            os.Exit(1)
+        }
+        log.Fatal(err)
+    }
+
+    defer file.Close()
+
 	today := int(time.Now().Weekday())
 
 	var wD int
@@ -23,11 +46,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	file, err := os.Open("./fixtures/horario.json")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
 
 	data, err := ioutil.ReadAll(file)
 	if err != nil {

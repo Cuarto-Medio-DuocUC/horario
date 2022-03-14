@@ -22,7 +22,7 @@ func (wd WeekDay) String() string {
 		"Lunes",
 		"Martes",
 		"Miércoles",
-		"Juesves",
+		"Jueves",
 		"Viernes",
 		"Sábado",
 	}

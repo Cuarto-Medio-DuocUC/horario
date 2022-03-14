@@ -45,8 +45,7 @@ func main() {
 	}
 
 	table := table.NewTable(os.Stdout)
-
-	table.MergeDay(len(courses) > 2)
+	table.MergeDay(len(courses) > 1)
 
 	for _, course := range courses {
 		datum := []string{

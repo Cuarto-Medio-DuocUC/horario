@@ -1,4 +1,4 @@
-module github.com/Cuarto-Medio-IFPT-DuocUC-2022/horario
+module github.com/Cuarto-Medio-DuocUC/horario
 
 go 1.16
 

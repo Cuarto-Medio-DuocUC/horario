@@ -9,7 +9,7 @@ import (
 	"os/user"
 	"time"
 
-	"github.com/Cuarto-Medio-IFPT-DuocUC-2022/horario/table"
+	"github.com/Cuarto-Medio-DuocUC/horario/table"
 )
 
 const fileName = "horario.json"

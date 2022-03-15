@@ -57,20 +57,18 @@ type ClassDay struct {
 	Classrooms []Classroom `json:"classrooms"`
 }
 
-func RequestedCourses(data []byte, wd WeekDay) ([]Classroom, error) {
-	var weekClasses []ClassDay
-	err := json.Unmarshal(data, &weekClasses)
-	if err != nil {
-		return []Classroom{}, err
-	}
+func ParseFile(rawData []byte) (map[WeekDay][]Classroom, error) {
+	data := make(map[WeekDay][]Classroom)
 
-	var dayclasses []Classroom
+	var weekClasses []ClassDay
+	err := json.Unmarshal(rawData, &weekClasses)
+	if err != nil {
+		return data, err
+	}
 
 	for _, day := range weekClasses {
-		if day.Day == wd {
-			return day.Classrooms, nil
-		}
+		data[day.Day] = day.Classrooms
 	}
 
-	return dayclasses, nil
+	return data, nil
 }

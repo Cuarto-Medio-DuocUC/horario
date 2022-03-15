@@ -1,35 +1,24 @@
 package main
 
 import (
+	"embed"
 	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
-	"os/user"
 	"time"
 
 	"github.com/Cuarto-Medio-DuocUC/horario/table"
 )
 
-const fileName = "horario.json"
+//go:embed fixtures/horario.json
+var rawData embed.FS
 
 func main() {
 
-    user, err := user.Current()
+    file, err := rawData.Open("fixtures/horario.json")
     if err != nil {
-        log.Fatal(err)
-    }
-
-    fromConfig := fmt.Sprintf("%s/.config/%s", user.HomeDir, fileName)
-
-    // read file from config directory
-    file, err := os.Open(fromConfig)
-    if err != nil {
-        if os.IsNotExist(err) {
-            fmt.Printf("La informacion del horario no esta en la ruta %s\n", fromConfig)
-            os.Exit(1)
-        }
         log.Fatal(err)
     }
 
@@ -46,18 +35,19 @@ func main() {
 		os.Exit(1)
 	}
 
-
-	data, err := ioutil.ReadAll(file)
+	rawData, err := ioutil.ReadAll(file)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	weekDay := WeekDay(wD)
-	courses, err := RequestedCourses(data, weekDay)
-	if err != nil {
-		log.Fatal(err)
-	}
-	if len(courses) == 0 {
+    coursesData, err := ParseFile(rawData)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+	courses, ok := coursesData[weekDay]
+	if !ok {
 		fmt.Printf("No hay clases hoy %s\n", weekDay)
 		os.Exit(0)
 	}
